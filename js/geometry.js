@@ -5,11 +5,11 @@ var utils = require('./utils.js');
 var rectangleVertices = function(x, y, z, width, height) {
   return [
     x,         y         , z,
-    x,         y + height, z,
-    x + width, y         , z,
-    x        , y + height, z,
-    x + width, y + height, z,
-    x + width, y         , z,
+    x,         y - height, z,
+    x - width, y         , z,
+    x        , y - height, z,
+    x - width, y - height, z,
+    x - width, y         , z,
   ];
 };
 
