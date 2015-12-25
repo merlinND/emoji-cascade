@@ -1,5 +1,7 @@
 'use strict';
 
+var webglUtils = require('./webgl-utils');
+
 module.exports = {
   /** Get the WebGL context from the `canvas` element */
   getContext: function(canvasId) {
@@ -8,7 +10,7 @@ module.exports = {
   },
 
   setupProgram: function(gl, vertexShader, fragmentShader) {
-    var program = createProgramFromScripts(gl, [vertexShader, fragmentShader]);
+    var program = webglUtils.createProgramFromScripts(gl, [vertexShader, fragmentShader]);
     gl.useProgram(program);
     return program;
   },
