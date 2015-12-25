@@ -198,19 +198,25 @@ var drawRectangleGrid = function(gl, program, nx, ny, spacing, size, spritesheet
   }
 }
 
+var init = function(gl) {
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.enable(gl.BLEND);
+}
+
 var main = function() {
   var canvasId = 'canvas';
   var canvas = document.getElementById(canvasId);
 
   var gl = getContext(canvasId);
   var program = setupProgram(gl, '2d-vertex-shader', '2d-fragment-shader');
+  init(gl);
 
   setResolution(gl, program, canvasId);
 
   var draw = function(spritesheet) {
     var nRectanglesX = 30;
     var nRectanglesY = nRectanglesX;
-    var spacing = canvas.width / 50;
+    var spacing = - canvas.width / 100;
     drawRectangleGrid(gl, program, nRectanglesX, nRectanglesY, spacing, canvas.width / nRectanglesX, spritesheet);
   }
 
