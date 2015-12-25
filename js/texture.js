@@ -1,7 +1,5 @@
 'use strict';
 
-var spr = require('./spritesheet.js');
-
 module.exports = {
   load: function(gl, path, placeholderColor, cb) {
     // Create a texture
@@ -14,8 +12,6 @@ module.exports = {
     var image = new Image();
     image.src = path;
     image.addEventListener('load', function() {
-      var spritesheet = spr.createFromImage(image);
-
       // Now that the image has loaded copy it to the texture
       console.log("Successfully loaded texture from: " + path + " (" + image.width + " x " + image.height + ")");
       gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -29,9 +25,7 @@ module.exports = {
         console.warn("Could not generate mipmaps for texture.");
       }
 
-      requestAnimationFrame(function() {
-        cb(spritesheet);
-      });
+      cb(image);
     });
   },
 };
