@@ -61,15 +61,17 @@ var drawRectangle = function(gl, x, y, width, height) {
   gl.drawArrays(gl.TRIANGLES, 0, verticesCoordinates.length / 2);
 }
 
-var drawRandomRectangle = function(gl, program, maxWidth, maxHeight) {
-  var color = [Math.random(), Math.random(), Math.random(), 1];
-  var x = Math.random() * maxWidth,
-      y = Math.random() * maxHeight,
-      width = Math.random() * (maxWidth - x),
-      height = Math.random() * (maxHeight - y);
+var drawRectangleGrid = function(gl, program, nx, ny, spacing, size) {
+  for (var i = 0; i < nx; ++i) {
+    for (var j = 0; j < ny; ++j) {
+      var color = [Math.random(), Math.random(), Math.random(), 1];
+      var x = (size + spacing) * i,
+          y = (size + spacing) * j;
 
-  setColor(gl, program, color);
-  drawRectangle(gl, x, y, width, height, color);
+      setColor(gl, program, color);
+      drawRectangle(gl, x, y, size, size, color);
+    }
+  }
 }
 
 var main = function() {
@@ -84,9 +86,10 @@ var main = function() {
   var positionAttribute = gl.getAttribLocation(program, 'a_position');
   makeBufferForRectangle(gl, positionAttribute);
 
-  for(var i = 0; i < 30; i += 1) {
-    drawRandomRectangle(gl, program, canvas.width, canvas.height);
-  }
+  var nRectanglesX = 10;
+  var nRectanglesY = nRectanglesX;
+  var spacing = canvas.width / 50;
+  drawRectangleGrid(gl, program, nRectanglesX, nRectanglesY, spacing, canvas.width / nRectanglesX);
 }
 
 main();
