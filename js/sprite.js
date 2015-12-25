@@ -17,8 +17,6 @@ Sprite.prototype.getVertices = function() {
 };
 Sprite.fromSpritesheet = function(x, y, width, height, sheet, i, j) {
   var s = new Sprite(x, y, width, height);
-
-  console.log(sheet);
   s.uv = sheet.getRectangleUVForSprite(i, j);
   return s;
 }

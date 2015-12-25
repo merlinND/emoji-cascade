@@ -20,6 +20,17 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   return sprites;
 }
 
+var animateSprites = function(sprites, dt) {
+  for (var i in sprites) {
+    var sprite = sprites[i];
+
+    // Apply some randome perturbation
+    // TODO: more interesting animation
+    sprite.x += dt * (Math.random() - 0.5) * 2;
+    sprite.y += dt * (Math.random() - 0.5) * 2;
+  }
+}
+
 var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
   for (var i in sprites) {
     var sprite = sprites[i];
@@ -59,7 +70,16 @@ var main = function() {
 
     var vertexBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, 'a_position'));
     var uvBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, "a_texcoords"));
-    drawSprites(gl, sprites, vertexBuffer, uvBuffer);
+
+    var draw = function() {
+      // TODO: compute dt from actual elapsed time
+      var dt = 1;
+      animateSprites(sprites, dt);
+      drawSprites(gl, sprites, vertexBuffer, uvBuffer);
+      window.requestAnimationFrame(draw);
+    }
+
+    window.requestAnimationFrame(draw);
   });
 }
 
