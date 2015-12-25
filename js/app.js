@@ -6,6 +6,10 @@ var utils = require('./utils.js');
 var Sprite = require('./sprite.js');
 var spritesheet = require('./spritesheet.js');
 
+/** Configuration and state */
+var framerateCap = 30;
+var animationEnabled = true;
+
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
   for (var i = 0; i < nx; ++i) {
@@ -26,8 +30,8 @@ var animateSprites = function(sprites, dt) {
 
     // Apply some randome perturbation
     // TODO: more interesting animation
-    sprite.x += dt * (Math.random() - 0.5) * 2;
-    sprite.y += dt * (Math.random() - 0.5) * 2;
+    sprite.x += dt * (Math.random() - 0.5) * 0.05;
+    sprite.y += dt * (Math.random() - 0.5) * 0.05;
   }
 }
 
@@ -46,6 +50,16 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
 var init = function(gl) {
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.BLEND);
+
+  window.addEventListener('keypress', function(e) {
+    console.log(arguments);
+    if (!e) return;
+
+    if (e.keyCode && e.keyCode == 32) {
+      animationEnabled = !animationEnabled;
+      console.log(animationEnabled);
+    }
+  }, false);
 }
 
 var main = function() {
@@ -71,12 +85,21 @@ var main = function() {
     var vertexBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, 'a_position'));
     var uvBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, "a_texcoords"));
 
+    var time;
     var draw = function() {
       // TODO: compute dt from actual elapsed time
-      var dt = 1;
-      animateSprites(sprites, dt);
-      drawSprites(gl, sprites, vertexBuffer, uvBuffer);
-      window.requestAnimationFrame(draw);
+      var now = new Date().getTime();
+      var dt = now - (time || now);
+      time = now;
+
+      if (animationEnabled) {
+        animateSprites(sprites, dt);
+        drawSprites(gl, sprites, vertexBuffer, uvBuffer);
+      }
+      // Wait for a bit before requesting the next frame
+      setTimeout(function() {
+        window.requestAnimationFrame(draw);
+      }, 1000 / framerateCap);
     }
 
     window.requestAnimationFrame(draw);
