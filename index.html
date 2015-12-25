@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/webgl-utils.js"></script>
+
+  <title>WebGL playground</title>
+</head>
+
+<body>
+  <!-- TODO: full-size canvas -->
+  <canvas id="canvas" width="800px" height="800px"></canvas>
+
+
+  <!-- WebGL vertex shader -->
+  <script id="2d-vertex-shader" type="x-shader/x-vertex">
+    /** Horizontal and vertical resolution (width, height of the canvas) */
+    uniform vec2 u_resolution;
+    /** Position of a given vertex */
+    attribute vec2 a_position;
+
+    vec2 toClipSpace(vec2 vectorInPixels) {
+      vec2 scaled = vectorInPixels / u_resolution;
+      return (scaled * 2.0) - 1.0;
+    }
+
+    void main() {
+      gl_Position = vec4(toClipSpace(a_position) * vec2(1, -1), 0, 1);
+    }
+  </script>
+
+  <!-- WebGL fragment shader -->
+  <script id="2d-fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    uniform vec4 u_color;
+
+    void main() {
+      gl_FragColor = u_color;
+    }
+  </script>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
