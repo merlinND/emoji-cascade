@@ -1,5 +1,6 @@
 'use strict';
 
+var camera = require('./camera.js');
 var geometry = require('./geometry.js');
 var texture = require('./texture.js');
 var utils = require('./utils.js');
@@ -7,7 +8,7 @@ var Sprite = require('./sprite.js');
 var spritesheet = require('./spritesheet.js');
 
 /** Configuration and state */
-var framerateCap = 30;
+var framerateCap = 3;
 var animationEnabled = true;
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
@@ -17,7 +18,7 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
       var x = (size + spacing) * i,
           y = (size + spacing) * j;
 
-      sprites.push(Sprite.fromSpritesheet(x, y, size, size, spritesheet, i, j));
+      sprites.push(Sprite.fromSpritesheet(x, y, 0, size, size, spritesheet, i, j));
     }
   }
 
@@ -32,6 +33,7 @@ var animateSprites = function(sprites, dt) {
     // TODO: more interesting animation
     sprite.x += dt * (Math.random() - 0.5) * 0.05;
     sprite.y += dt * (Math.random() - 0.5) * 0.05;
+    sprite.z += dt * (Math.random() - 0.5) * 10;
   }
 }
 
@@ -40,24 +42,32 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
     var sprite = sprites[i];
 
     // Draw textured triangles
+    // TODO: collate into a single draw call
     var vertexCoordinates = sprite.getVertices();
     utils.fillBuffer(gl, vertexBuffer, vertexCoordinates);
     utils.fillBuffer(gl, uvBuffer, sprite.uv);
-    gl.drawArrays(gl.TRIANGLES, 0, vertexCoordinates.length / 2);
+    gl.drawArrays(gl.TRIANGLES, 0, vertexCoordinates.length / 3);
   }
 }
 
-var init = function(gl) {
+var init = function(gl, program, canvas) {
+  // gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.CULL_FACE);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.BLEND);
 
+  // Setup projection matrix
+  // TODO: dynamic view
+  var projectionMatrix = camera.makeCamera(canvas, 1000);
+  var matrixAttribute = gl.getUniformLocation(program, 'u_matrix');
+  gl.uniformMatrix4fv(matrixAttribute, false, projectionMatrix);
+
+  // Handle keyboard input
   window.addEventListener('keypress', function(e) {
-    console.log(arguments);
     if (!e) return;
 
     if (e.keyCode && e.keyCode == 32) {
       animationEnabled = !animationEnabled;
-      console.log(animationEnabled);
     }
   }, false);
 }
@@ -65,10 +75,9 @@ var init = function(gl) {
 var main = function() {
   var canvasId = 'canvas';
   var canvas = document.getElementById(canvasId);
-
   var gl = utils.getContext(canvasId);
   var program = utils.setupProgram(gl, '2d-vertex-shader', '2d-fragment-shader');
-  init(gl);
+  init(gl, program, canvas);
 
   utils.setResolution(gl, program, canvasId);
 
@@ -82,12 +91,13 @@ var main = function() {
     var spacing = - canvas.width / 150;
     var sprites = createSprites(gl, program, nRectanglesX, nRectanglesY, spacing, canvas.width / nRectanglesX, sheet);
 
-    var vertexBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, 'a_position'));
+    var vertexBuffer = utils.makeBuffer(gl, 3, gl.getAttribLocation(program, 'a_position'));
     var uvBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, "a_texcoords"));
 
     var time;
     var draw = function() {
-      // TODO: compute dt from actual elapsed time
+      // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
       var now = new Date().getTime();
       var dt = now - (time || now);
       time = now;

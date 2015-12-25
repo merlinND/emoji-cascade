@@ -2,14 +2,14 @@
 
 var utils = require('./utils.js');
 
-var rectangleVertices = function(x, y, width, height) {
+var rectangleVertices = function(x, y, z, width, height) {
   return [
-    x,         y,
-    x,         y + height,
-    x + width, y,
-    x + width, y + height,
-    x        , y + height,
-    x + width, y,
+    x,         y         , 0,
+    x,         y + height, 0,
+    x + width, y         , 0,
+    x        , y + height, 0,
+    x + width, y + height, 0,
+    x + width, y         , 0,
   ];
 };
 
@@ -17,8 +17,8 @@ var rectangleUV = [
   0, 0,
   0, 1,
   1, 0,
-  1, 1,
   0, 1,
+  1, 1,
   1, 0,
 ];
 
@@ -27,8 +27,8 @@ module.exports = {
   rectangleUV: rectangleUV,
 
   rectangleDrawer: function(vertexBuffer, uvBuffer) {
-    return function(gl, x, y, width, height, uv) {
-      var verticesCoordinates = rectangleVertices(x, y, width, height);
+    return function(gl, x, y, z, width, height, uv) {
+      var verticesCoordinates = rectangleVertices(x, y, z, width, height);
 
       uv = uv || rectangleUV;
 
