@@ -1,5 +1,4 @@
 'use strict';
-
 // TODO: modularize and refactor code
 
 /**
