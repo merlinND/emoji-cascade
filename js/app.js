@@ -8,7 +8,7 @@ var Sprite = require('./sprite.js');
 var spritesheet = require('./spritesheet.js');
 
 /** Configuration and state */
-var framerateCap = 3;
+var framerateCap = 30;
 var fieldOfView = 60;  // In degrees
 var animationEnabled = true;
 
@@ -16,10 +16,10 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
   for (var i = 0; i < nx; ++i) {
     for (var j = 0; j < ny; ++j) {
-      var x = (size + spacing) * i,
-          y = (size + spacing) * j;
+      var x = (size + spacing) * i - (0.5 * size * nx),
+          y = (size + spacing) * j - (0.5 * size * ny);
 
-      sprites.push(Sprite.fromSpritesheet(x, y, -350, size, size, spritesheet, i, j));
+      sprites.push(Sprite.fromSpritesheet(x, y, -1000, size, size, spritesheet, i, j));
     }
   }
 
@@ -34,7 +34,7 @@ var animateSprites = function(sprites, dt) {
     // TODO: more interesting animation
     sprite.x += dt * (Math.random() - 0.5) * 0.05;
     sprite.y += dt * (Math.random() - 0.5) * 0.05;
-    sprite.z += dt * (Math.random() - 0.5) * 0.05;
+    sprite.z += dt * (Math.random() - 0.5) * 1;
   }
 }
 
@@ -52,8 +52,8 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
 }
 
 var init = function(gl, program, canvas) {
-  // gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE);
+  gl.enable(gl.DEPTH_TEST);
+  // gl.enable(gl.CULL_FACE);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.BLEND);
 
@@ -90,7 +90,7 @@ var main = function() {
   texture.load(gl, texturePath, [0, 0, 255, 255], function(image) {
     var sheet = spritesheet.createFromImage(image);
 
-    var nRectanglesX = 30;
+    var nRectanglesX = 10;
     var nRectanglesY = nRectanglesX;
     var spacing = - canvas.width / 150;
     var sprites = createSprites(gl, program, nRectanglesX, nRectanglesY, spacing, canvas.width / nRectanglesX, sheet);
@@ -100,7 +100,7 @@ var main = function() {
 
     var time;
     var draw = function() {
-      // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       var now = new Date().getTime();
       var dt = now - (time || now);
