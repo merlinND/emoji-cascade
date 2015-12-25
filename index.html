@@ -18,6 +18,10 @@
     uniform vec2 u_resolution;
     /** Position of a given vertex */
     attribute vec2 a_position;
+    /** Texture coordinate of a given vertex (uv space) */
+    attribute vec2 a_texcoords;
+
+    varying vec2 v_texcoord;
 
     vec2 toClipSpace(vec2 vectorInPixels) {
       vec2 scaled = vectorInPixels / u_resolution;
@@ -26,6 +30,8 @@
 
     void main() {
       gl_Position = vec4(toClipSpace(a_position) * vec2(1, -1), 0, 1);
+      // Pass to the fragment shader
+      v_texcoord = a_texcoords;
     }
   </script>
 
@@ -34,8 +40,15 @@
     precision mediump float;
     uniform vec4 u_color;
 
+    // Texture coordinate (received from the vertex shader)
+    varying vec2 v_texcoord;
+    // The texture
+    uniform sampler2D u_texture;
+
     void main() {
-      gl_FragColor = u_color;
+      // TODO: auto-fallback to the color if texture is not available
+      gl_FragColor = texture2D(u_texture, v_texcoord);
+      // gl_FragColor = u_color;
     }
   </script>
 
