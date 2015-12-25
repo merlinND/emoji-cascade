@@ -36,6 +36,6 @@ module.exports = {
       utils.fillBuffer(gl, vertexBuffer, verticesCoordinates);
       utils.fillBuffer(gl, uvBuffer, uv);
       gl.drawArrays(gl.TRIANGLES, 0, verticesCoordinates.length / 2);
-    }
+    };
   },
 };

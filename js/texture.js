@@ -18,7 +18,7 @@ module.exports = {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
 
       // TODO: make image size a power of 2 so that we can geretate mipmaps
-      var isPowerOf2 = function(n) { return (n & (n - 1)) == 0; };
+      var isPowerOf2 = function(n) { return (n & (n - 1)) === 0; };
       if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
         gl.generateMipmap(gl.TEXTURE_2D);
       } else {

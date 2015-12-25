@@ -1,7 +1,6 @@
 'use strict';
 
 var camera = require('./camera.js');
-var geometry = require('./geometry.js');
 var texture = require('./texture.js');
 var utils = require('./utils.js');
 var Sprite = require('./sprite.js');
@@ -14,8 +13,8 @@ var animationEnabled = true;
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
-  for (var i = 0; i < nx; ++i) {
-    for (var j = 0; j < ny; ++j) {
+  for (var i = 0; i < nx; i += 1) {
+    for (var j = 0; j < ny; j += 1) {
       var x = (size + spacing) * i - (0.5 * size * nx),
           y = (size + spacing) * j - (0.5 * size * ny);
 
@@ -24,7 +23,7 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   }
 
   return sprites;
-}
+};
 
 var animateSprites = function(sprites, dt) {
   for (var i in sprites) {
@@ -36,7 +35,7 @@ var animateSprites = function(sprites, dt) {
     sprite.y += dt * (Math.random() - 0.5) * 0.05;
     sprite.z += dt * (Math.random() - 0.5) * 1;
   }
-}
+};
 
 var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
   for (var i in sprites) {
@@ -49,7 +48,7 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
     utils.fillBuffer(gl, uvBuffer, sprite.uv);
     gl.drawArrays(gl.TRIANGLES, 0, vertexCoordinates.length / 3);
   }
-}
+};
 
 var init = function(gl, program, canvas) {
   gl.enable(gl.DEPTH_TEST);
@@ -68,13 +67,15 @@ var init = function(gl, program, canvas) {
 
   // Handle keyboard input
   window.addEventListener('keypress', function(e) {
-    if (!e) return;
+    if (!e) {
+      return;
+    }
 
-    if (e.keyCode && e.keyCode == 32) {
+    if (e.keyCode && e.keyCode === 32) {
       animationEnabled = !animationEnabled;
     }
   }, false);
-}
+};
 
 var main = function() {
   var canvasId = 'canvas';
@@ -105,6 +106,9 @@ var main = function() {
       var now = new Date().getTime();
       var dt = now - (time || now);
       time = now;
+      // Cap dt in case no frame was rendered for a while
+      // (which happens when the browser window is not visible)
+      dt = Math.min(dt, 100);
 
       if (animationEnabled) {
         animateSprites(sprites, dt);
@@ -114,10 +118,10 @@ var main = function() {
       setTimeout(function() {
         window.requestAnimationFrame(draw);
       }, 1000 / framerateCap);
-    }
+    };
 
     window.requestAnimationFrame(draw);
   });
-}
+};
 
 main();

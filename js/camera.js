@@ -13,4 +13,4 @@ module.exports = {
       0, 0, near * far * rangeInv * 2, 0
     ];
   }
-}
+};
