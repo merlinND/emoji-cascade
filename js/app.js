@@ -9,6 +9,7 @@ var spritesheet = require('./spritesheet.js');
 
 /** Configuration and state */
 var framerateCap = 3;
+var fieldOfView = 60;  // In degrees
 var animationEnabled = true;
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
@@ -18,7 +19,7 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
       var x = (size + spacing) * i,
           y = (size + spacing) * j;
 
-      sprites.push(Sprite.fromSpritesheet(x, y, 0, size, size, spritesheet, i, j));
+      sprites.push(Sprite.fromSpritesheet(x, y, -350, size, size, spritesheet, i, j));
     }
   }
 
@@ -33,7 +34,7 @@ var animateSprites = function(sprites, dt) {
     // TODO: more interesting animation
     sprite.x += dt * (Math.random() - 0.5) * 0.05;
     sprite.y += dt * (Math.random() - 0.5) * 0.05;
-    sprite.z += dt * (Math.random() - 0.5) * 10;
+    sprite.z += dt * (Math.random() - 0.5) * 0.05;
   }
 }
 
@@ -58,7 +59,10 @@ var init = function(gl, program, canvas) {
 
   // Setup projection matrix
   // TODO: dynamic view
-  var projectionMatrix = camera.makeCamera(canvas, 1000);
+  var projectionMatrix = camera.makeCamera(canvas,
+                                           (Math.PI * fieldOfView / 180),
+                                           1, 2000);
+  console.log(projectionMatrix);
   var matrixAttribute = gl.getUniformLocation(program, 'u_matrix');
   gl.uniformMatrix4fv(matrixAttribute, false, projectionMatrix);
 
