@@ -1,8 +1,55 @@
 'use strict';
 
+// TODO: modularize and refactor code
+
 /**
- * Get the WebGL context from the `canvas` element
+ * Data structure representing the spritesheet.
+ * Each sprite has a fixed square size.
  */
+// TODO: mechanism to exclude specific sprites
+var newSpritesheet = function(image) {
+  var w = 21;
+  var h = 21;
+  return {
+    width: w,
+    height: h,
+    sheetWidth: image.width,
+    sheetHeight: image.height,
+
+    nx: Math.floor(image.width / w),
+    ny: Math.floor(image.height / h),
+
+    /**
+     * Get UV coordinates for the sprite at position (i, j).
+     * Boundary conditions are applied to the (i, j) coordinates passed.
+     */
+    getSpriteUV: function(i, j) {
+      i = (i % this.ny);
+      j = (j % this.nx);
+
+      return [i / this.ny, j / this.nx];
+    },
+
+    getRectangleUVForSprite: function(i, j) {
+      // Compute UV coordinates corresponding to the particular sprite
+      var corner = this.getSpriteUV(i, j);
+      var x0 = corner[0], y0 = corner[1],
+          x1 = x0 + (this.width / this.sheetWidth),
+          y1 = y0 + (this.height / this.sheetHeight);
+
+      return [
+        x0, y0,
+        x0, y1,
+        x1, y0,
+        x1, y1,
+        x0, y1,
+        x1, y0
+      ];
+    }
+  }
+}
+
+/** Get the WebGL context from the `canvas` element */
 var getContext = function(canvasId) {
   var canvas = document.getElementById(canvasId);
   return canvas.getContext('experimental-webgl');
@@ -37,7 +84,9 @@ var loadTextureAsync = function(gl, path, placeholderColor, cb) {
   var image = new Image();
   image.src = path;
   image.addEventListener('load', function() {
-    // Now that the image has loaded make copy it to the texture.
+    var spritesheet = newSpritesheet(image);
+
+    // Now that the image has loaded copy it to the texture
     console.log("Successfully loaded texture from: " + path + " (" + image.width + " x " + image.height + ")");
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
@@ -50,7 +99,9 @@ var loadTextureAsync = function(gl, path, placeholderColor, cb) {
       console.warn("Could not generate mipmaps for texture.");
     }
 
-    requestAnimationFrame(cb);
+    requestAnimationFrame(function() {
+      cb(spritesheet);
+    });
   });
 }
 
@@ -95,32 +146,33 @@ var fillTextureCoordinatesBuffer = function(gl, buffer, coordinates) {
 }
 
 var drawRectangle = function(vertexBuffer, uvBuffer) {
-  return function(gl, x, y, width, height) {
+  return function(gl, x, y, width, height, uv) {
     var verticesCoordinates = [
-        x,         y,
-        x,         y + height,
-        x + width, y,
-        x + width, y + height,
-        x        , y + height,
-        x + width, y,
-      ];
-    var textureCoordinates = [
+      x,         y,
+      x,         y + height,
+      x + width, y,
+      x + width, y + height,
+      x        , y + height,
+      x + width, y,
+    ];
+
+    uv = uv || [
       0, 0,
       0, 1,
       1, 0,
       1, 1,
       0, 1,
       1, 0,
-    ]
+    ];
 
     // Draw triangles
     fillRectangleBuffer(gl, vertexBuffer, verticesCoordinates);
-    fillTextureCoordinatesBuffer(gl, uvBuffer, textureCoordinates);
+    fillTextureCoordinatesBuffer(gl, uvBuffer, uv);
     gl.drawArrays(gl.TRIANGLES, 0, verticesCoordinates.length / 2);
   }
 }
 
-var drawRectangleGrid = function(gl, program, nx, ny, spacing, size) {
+var drawRectangleGrid = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var vertexBuffer = makeBufferForVertices(gl,
                                            gl.getAttribLocation(program, 'a_position'));
 
@@ -128,14 +180,20 @@ var drawRectangleGrid = function(gl, program, nx, ny, spacing, size) {
                                                  gl.getAttribLocation(program, "a_texcoords"));
 
   var draw = drawRectangle(vertexBuffer, uvBuffer);
+  var uv = null;
+
   for (var i = 0; i < nx; ++i) {
     for (var j = 0; j < ny; ++j) {
       var color = [Math.random(), Math.random(), Math.random(), 1];
       var x = (size + spacing) * i,
           y = (size + spacing) * j;
 
+      if (spritesheet) {
+        uv = spritesheet.getRectangleUVForSprite(i, j);
+      }
+
       setColor(gl, program, color);
-      draw(gl, x, y, size, size, color);
+      draw(gl, x, y, size, size, uv);
     }
   }
 }
@@ -149,17 +207,17 @@ var main = function() {
 
   setResolution(gl, program, canvasId);
 
-  var draw = function() {
-    var nRectanglesX = 10;
+  var draw = function(spritesheet) {
+    var nRectanglesX = 30;
     var nRectanglesY = nRectanglesX;
     var spacing = canvas.width / 50;
-    drawRectangleGrid(gl, program, nRectanglesX, nRectanglesY, spacing, canvas.width / nRectanglesX);
+    drawRectangleGrid(gl, program, nRectanglesX, nRectanglesY, spacing, canvas.width / nRectanglesX, spritesheet);
   }
 
   draw();
 
-  // var texturePath = 'http://127.0.0.1:8000/textures/sheet_apple_16.png';
-  var texturePath = 'http://127.0.0.1:8000/textures/doge.jpg';
+  var texturePath = 'http://127.0.0.1:8000/textures/emoji_square.png';
+  // var texturePath = 'http://127.0.0.1:8000/textures/doge.jpg';
   loadTextureAsync(gl, texturePath, [0, 0, 255, 255], draw);
 }
 
