@@ -32,19 +32,23 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   for (var i = 0; i < nx; i += 1) {
     for (var j = 0; j < ny; j += 1) {
       var x = (size + spacing) * i - (0.5 * size * nx);
-      var y = (size + spacing) * j - (0.5 * size * ny)
+      var y = (size + spacing) * j - (0.5 * size * ny);
+      var z = -2000;
       if (jitter) {
         x += 10 * spacing * (Math.random() - 0.5);
         y += 10 * spacing * (Math.random() - 0.5);
+        z += 10 * spacing * (Math.random() - 0.5);
       }
 
-      var s = Sprite.fromSpritesheet(x, y, -1000, size, size,
+      var s = Sprite.fromSpritesheet(x, y, z, size, size,
                                      spritesheet, i, j);
 
-      spiralOptions.width = maxWidth * Math.random();
+      spiralOptions.width = (maxWidth - 40) * Math.random() + 40;
       spiralOptions.phase = 2 * Math.PI * Math.random();
       spiralOptions.timeshift = maxPeriod * Math.random();
       s.trajectory = trajectories.spiral(spiralOptions);
+
+      // s.trajectory = trajectories.straightAhead(3000, -2000);
       sprites.push(s);
     }
   }
@@ -59,9 +63,16 @@ var animateSprites = function(sprites, t, dt) {
 };
 
 var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
+  // Sort by z order before drawing so that transparency works as expected
+  // TODO: better / faster way?
+  sprites.sort(function(a, b) {
+    if (a.z < b.z) return -1;
+    else if (a.z === b.z) return 0;
+    return 1;
+  });
+
   for (var i in sprites) {
     var sprite = sprites[i];
-
     // Draw textured triangles
     // TODO: collate into a single draw call
     var vertexCoordinates = sprite.getVertices();
@@ -72,7 +83,7 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
 };
 
 var init = function(gl, program, canvas) {
-  gl.enable(gl.DEPTH_TEST);
+  // gl.enable(gl.DEPTH_TEST);
   // gl.enable(gl.CULL_FACE);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.enable(gl.BLEND);
