@@ -15,10 +15,10 @@ module.exports = {
     }
   },
 
-  straightAhead: function(speed) {
+  straightAhead: function(period, depth) {
     return function(t, dt, x, y, z) {
-      z = (-z - speed * t) % 1000;
-      return [x, y, -z];
+      var tt = (t % period) / period;
+      return [x, y, (1 - tt) * depth];
     }
   },
 
