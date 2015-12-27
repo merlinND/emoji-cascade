@@ -14,6 +14,18 @@ var animationEnabled = true;
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
+
+  var maxPeriod = 3000;
+  var maxWidth = 150;
+  var spiralOptions = {
+    period: maxPeriod,
+    depth: -2000,
+    width: maxWidth,
+    // Will be overriden for each sprite
+    phase: 0,
+    timeshift: 0
+  };
+
   for (var i = 0; i < nx; i += 1) {
     for (var j = 0; j < ny; j += 1) {
       var x = (size + spacing) * i - (0.5 * size * nx),
@@ -21,7 +33,11 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
 
       var s = Sprite.fromSpritesheet(x, y, -1000, size, size,
                                      spritesheet, i, j);
-      s.trajectory = trajectories.perturbations([0.5, 0.5, 10]);
+
+      spiralOptions.width = maxWidth * Math.random();
+      spiralOptions.phase = 2 * Math.PI * Math.random();
+      spiralOptions.timeshift = maxPeriod * Math.random();
+      s.trajectory = trajectories.spiral(spiralOptions);
       sprites.push(s);
     }
   }
