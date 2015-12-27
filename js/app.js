@@ -5,6 +5,7 @@ var texture = require('./texture.js');
 var utils = require('./utils.js');
 var Sprite = require('./sprite.js');
 var spritesheet = require('./spritesheet.js');
+var trajectories = require('./trajectories.js');
 
 /** Configuration and state */
 var framerateCap = 30;
@@ -18,22 +19,19 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
       var x = (size + spacing) * i - (0.5 * size * nx),
           y = (size + spacing) * j - (0.5 * size * ny);
 
-      sprites.push(Sprite.fromSpritesheet(x, y, -1000, size, size, spritesheet, i, j));
+      var s = Sprite.fromSpritesheet(x, y, -1000, size, size,
+                                     spritesheet, i, j);
+      s.trajectory = trajectories.perturbations([0.5, 0.5, 10]);
+      sprites.push(s);
     }
   }
 
   return sprites;
 };
 
-var animateSprites = function(sprites, dt) {
+var animateSprites = function(sprites, t, dt) {
   for (var i in sprites) {
-    var sprite = sprites[i];
-
-    // Apply some randome perturbation
-    // TODO: more interesting animation
-    sprite.x += dt * (Math.random() - 0.5) * 0.05;
-    sprite.y += dt * (Math.random() - 0.5) * 0.05;
-    sprite.z += dt * (Math.random() - 0.5) * 1;
+    sprites[i].animate(t, dt);
   }
 };
 
@@ -111,7 +109,7 @@ var main = function() {
       dt = Math.min(dt, 100);
 
       if (animationEnabled) {
-        animateSprites(sprites, dt);
+        animateSprites(sprites, time, dt);
         drawSprites(gl, sprites, vertexBuffer, uvBuffer);
       }
       // Wait for a bit before requesting the next frame
