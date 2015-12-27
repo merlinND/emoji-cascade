@@ -16,6 +16,8 @@ var startTime; // Value of the time (ms) when animation started
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
 
+  var jitter = true;
+
   var maxPeriod = 3000;
   var maxWidth = 150;
   var spiralOptions = {
@@ -29,8 +31,12 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
 
   for (var i = 0; i < nx; i += 1) {
     for (var j = 0; j < ny; j += 1) {
-      var x = (size + spacing) * i - (0.5 * size * nx),
-          y = (size + spacing) * j - (0.5 * size * ny);
+      var x = (size + spacing) * i - (0.5 * size * nx);
+      var y = (size + spacing) * j - (0.5 * size * ny)
+      if (jitter) {
+        x += 10 * spacing * (Math.random() - 0.5);
+        y += 10 * spacing * (Math.random() - 0.5);
+      }
 
       var s = Sprite.fromSpritesheet(x, y, -1000, size, size,
                                      spritesheet, i, j);
