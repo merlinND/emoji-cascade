@@ -11,6 +11,7 @@ var trajectories = require('./trajectories.js');
 var framerateCap = 30;
 var fieldOfView = 60;  // In degrees
 var animationEnabled = true;
+var startTime; // Value of the time (ms) when animation started
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
@@ -114,6 +115,7 @@ var main = function() {
     var uvBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, "a_texcoords"));
 
     var time;
+    startTime = new Date().getTime();
     var draw = function() {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -125,7 +127,7 @@ var main = function() {
       dt = Math.min(dt, 100);
 
       if (animationEnabled) {
-        animateSprites(sprites, time, dt);
+        animateSprites(sprites, time - startTime, dt);
         drawSprites(gl, sprites, vertexBuffer, uvBuffer);
       }
       // Wait for a bit before requesting the next frame
