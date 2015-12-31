@@ -71,15 +71,31 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
     return 1;
   });
 
+  // Preallocate the buffers, then fill them in chunks
+  // (one buffer after the other, to benefit from locality).
+  var floatSize = 4;
+  var nPrimitives = sprites.length * 6;
+  var offset = 0;
+
+  // ----- Vertex coordinates
+  // Allocate enough space for the buffer
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, 3 * floatSize * nPrimitives, gl.STATIC_DRAW);
   for (var i in sprites) {
-    var sprite = sprites[i];
-    // Draw textured triangles
-    // TODO: collate into a single draw call
-    var vertexCoordinates = sprite.getVertices();
-    utils.fillBuffer(gl, vertexBuffer, vertexCoordinates);
-    utils.fillBuffer(gl, uvBuffer, sprite.uv);
-    gl.drawArrays(gl.TRIANGLES, 0, vertexCoordinates.length / 3);
+    var vertices = sprites[i].getVertices();
+    gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(vertices));
+    offset += floatSize * vertices.length;
   }
+  // ----- UV coordinates
+  offset = 0;
+  gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, 2 * floatSize * nPrimitives, gl.STATIC_DRAW);
+  for (var i in sprites) {
+    var uvs = sprites[i].uv;
+    gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(uvs));
+    offset += floatSize * uvs.length;
+  }
+  gl.drawArrays(gl.TRIANGLES, 0, nPrimitives);
 };
 
 var init = function(gl, program, canvas) {
