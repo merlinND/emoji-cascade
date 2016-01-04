@@ -33,15 +33,18 @@ var trajectoryOptions = {
   maxPeriod: 3000,
   maxWidth: 200,
   maxDepth: -2000,
-  spiral: {
-    period: 3000,
-    depth: -2000,
-    width: 200,
-    // Will be overriden for each sprite
-    phase: 0,
-    timeshift: 0
+  spiral: function() {
+    console.log(this);
+    return {
+      period: 5000,
+      depth: -2000,
+      width: (this.maxWidth - 100) * Math.random() + 100,
+      // Will be overriden for each sprite
+      phase: 2 * Math.PI * Math.random(),
+      timeshift: this.maxPeriod * Math.random()
+    };
   },
-  cascade: {}
+  cascade: function() { return {}; }
 };
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
@@ -63,13 +66,8 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
 
       s.trajectory = trajectories.straightAhead(trajectoryOptions.maxPeriod, trajectoryOptions.maxDepth);
       // s.trajectory = trajectories.noop();
-
-      // spiralOptions.width = (maxWidth - 100) * Math.random() + 100;
-      // spiralOptions.phase = 2 * Math.PI * Math.random();
-      // spiralOptions.timeshift = maxPeriod * Math.random();
-      // s.trajectory = trajectories.spiral(trajectoryOptions.spiral);
-
-      s.trajectory = trajectories.cascade(trajectoryOptions.cascade);
+      s.trajectory = trajectories.spiral(trajectoryOptions.spiral());
+      // s.trajectory = trajectories.cascade(trajectoryOptions.cascade());
 
       sprites.push(s);
     }
