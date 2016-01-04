@@ -66,8 +66,8 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
   // Sort by z order before drawing so that transparency works as expected
   // TODO: better / faster way?
   sprites.sort(function(a, b) {
-    if (a.z < b.z) return -1;
-    else if (a.z === b.z) return 0;
+    if (a.z < b.z) { return -1; }
+    else if (a.z === b.z) { return 0; }
     return 1;
   });
 

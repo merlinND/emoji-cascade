@@ -12,9 +12,10 @@ var padImage = function(image) {
 
   var size = Math.pow(2, Math.ceil(Math.log2(Math.max(image.width, image.height))));
   var canvas = document.createElement("canvas");
-  canvas.width = canvas.height = size;
+  canvas.width = size;
+  canvas.height = size;
   var context = canvas.getContext("2d");
-  context.drawImage(image, 0, 0, image.width, image.height);
+  context.drawImage(image, 0, 0);
 
   return canvas;
 };

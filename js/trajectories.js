@@ -12,14 +12,14 @@ module.exports = {
   noop: function() {
     return function(t, dt, x, y, z) {
       return [x, y, z];
-    }
+    };
   },
 
   straightAhead: function(period, depth) {
     return function(t, dt, x, y, z) {
       var tt = (t % period) / period;
       return [x, y, (1 - tt) * depth];
-    }
+    };
   },
 
   perturbations: function(amplitudes) {
@@ -29,7 +29,7 @@ module.exports = {
         y + dt * (Math.random() - 0.5) * amplitudes[1],
         z + dt * (Math.random() - 0.5) * amplitudes[2]
       ];
-    }
+    };
   },
 
   // Fields of `option`:
@@ -57,6 +57,6 @@ module.exports = {
       // Depth
       z = depth * (1 - tt);
       return [x, y, z];
-    }
+    };
   }
 }
