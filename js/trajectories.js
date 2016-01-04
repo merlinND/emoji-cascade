@@ -33,7 +33,6 @@ module.exports = {
   },
 
   // Fields of `option`:
-  // - period, depth, width, height, offset
   // - `width`, `height` (defaults to the value of `width`)
   // - `period`: time (ms) to travel from `depth` to `0`
   // - `depth`: maximum z value (e.g. -2000 => range -2000...0)
@@ -58,5 +57,35 @@ module.exports = {
       z = depth * (1 - tt);
       return [x, y, z];
     };
+  },
+
+  // Fields of `option`:
+  // - `baseY`: y coordinate of the top of the cascade
+  // - `height`: height of the cascade (used to loop)
+  // - `width`: width factor of the arc along the x-axis
+  // - `fixedZ`: fixed z coordinate at which the object is placed
+  // - `direction`: 1 or -1 (right or left)
+  // - `speed`: falling speed (unit: something / time)
+  // - `verticalOffset`, `horizontalOffset`: translation of the trajectory
+  cascade: function(options) {
+    // General idea: x = (+/-) * sqrt(a * | y - b | ) + c
+    var baseY = options.baseY || 600;
+    var height = options.height || 1100;
+    var width = options.width || 250 * (Math.random() - 0.5);
+    var fixedZ = options.fixedZ || -500 + 200 * (Math.random() - 0.5);
+
+    var direction = options.direction || (Math.random() < 0.5 ? 1 : -1);
+    var verticalOffset = options.verticalOffset || baseY;
+    var horizontalOffset = options.verticalOffset || 30 * (Math.random() - 0.5);
+    var speed = options.speed || 0.15 + 0.1 * (Math.random() - 0.5);
+
+    return function(t, dt, x, y, z) {
+      y -= dt * speed;
+      if (y < baseY - height) {
+        y = baseY;
+      }
+      x = direction * Math.sqrt(width * Math.abs(y - verticalOffset)) + horizontalOffset;
+      return [x, y, fixedZ];
+    };
   }
-}
+};

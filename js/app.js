@@ -14,7 +14,6 @@ var fieldOfView = 70;  // In degrees
 var animationEnabled = true;
 var startTime;  // Value of the time (ms) when animation started
 var jitter = true;  // Whether to add small perturbations in initial emoji placement
-var smallSize = 16, largeSize = 32;
 var textures = [
   {
     path: 'http://127.0.0.1:8000/textures/sheet_apple_16.png',
@@ -30,26 +29,29 @@ var textures = [
   },
 ];
 
-
-var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
-  var sprites = [];
-
-  var maxPeriod = 3000;
-  var maxWidth = 200;
-  var spiralOptions = {
-    period: maxPeriod,
+var trajectoryOptions = {
+  maxPeriod: 3000,
+  maxWidth: 200,
+  maxDepth: -2000,
+  spiral: {
+    period: 3000,
     depth: -2000,
-    width: maxWidth,
+    width: 200,
     // Will be overriden for each sprite
     phase: 0,
     timeshift: 0
-  };
+  },
+  cascade: {}
+};
+
+var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
+  var sprites = [];
 
   for (var i = 0; i < nx; i += 1) {
     for (var j = 0; j < ny; j += 1) {
       var x = (size + spacing) * i - (0.5 * size * nx);
       var y = (size + spacing) * j - (0.5 * size * ny);
-      var z = -1999;
+      var z = trajectoryOptions.maxDepth + 1;
       if (jitter) {
         x += 10 * spacing * (Math.random() - 0.5);
         y += 10 * spacing * (Math.random() - 0.5);
@@ -59,13 +61,16 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
       var s = Sprite.fromSpritesheet(x, y, z, size, size,
                                      spritesheet, i, j);
 
-      spiralOptions.width = (maxWidth - 100) * Math.random() + 100;
-      spiralOptions.phase = 2 * Math.PI * Math.random();
-      spiralOptions.timeshift = maxPeriod * Math.random();
-      s.trajectory = trajectories.spiral(spiralOptions);
-
-      // s.trajectory = trajectories.straightAhead(3000, -2000);
+      s.trajectory = trajectories.straightAhead(trajectoryOptions.maxPeriod, trajectoryOptions.maxDepth);
       // s.trajectory = trajectories.noop();
+
+      // spiralOptions.width = (maxWidth - 100) * Math.random() + 100;
+      // spiralOptions.phase = 2 * Math.PI * Math.random();
+      // spiralOptions.timeshift = maxPeriod * Math.random();
+      // s.trajectory = trajectories.spiral(trajectoryOptions.spiral);
+
+      s.trajectory = trajectories.cascade(trajectoryOptions.cascade);
+
       sprites.push(s);
     }
   }
