@@ -39,16 +39,22 @@ module.exports = {
       console.log("Successfully loaded texture from: " + path + " (" + originalWidth + " x " + originalHeight + ")");
 
       // Make image size a power of 2
-      image = padImage(image);
+      // TODO: image seems to be scaled wrongly when using this method, fix
+      // image = padImage(image);
 
       // Now that the image has loaded copy it to the texture
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
       if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
         gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
       } else {
         console.warn("Could not generate mipmaps for texture.");
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       }
 
       return cb(image, originalWidth, originalHeight);
