@@ -9,17 +9,18 @@ var trajectories = require('./trajectories.js');
 
 /** Configuration and state */
 var framerateCap = 30;
-var fieldOfView = 60;  // In degrees
+// TODO: field of view should be computed from width of the viewport?
+var fieldOfView = 70;  // In degrees
 var animationEnabled = true;
-var startTime; // Value of the time (ms) when animation started
+var startTime;  // Value of the time (ms) when animation started
+var jitter = true;  // Whether to add small perturbations in initial emoji placement
+var smallSize = 16, largeSize = 32;
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
 
-  var jitter = true;
-
   var maxPeriod = 3000;
-  var maxWidth = 150;
+  var maxWidth = 200;
   var spiralOptions = {
     period: maxPeriod,
     depth: -2000,
@@ -33,7 +34,7 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
     for (var j = 0; j < ny; j += 1) {
       var x = (size + spacing) * i - (0.5 * size * nx);
       var y = (size + spacing) * j - (0.5 * size * ny);
-      var z = -2000;
+      var z = -1999;
       if (jitter) {
         x += 10 * spacing * (Math.random() - 0.5);
         y += 10 * spacing * (Math.random() - 0.5);
@@ -43,12 +44,13 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
       var s = Sprite.fromSpritesheet(x, y, z, size, size,
                                      spritesheet, i, j);
 
-      spiralOptions.width = (maxWidth - 40) * Math.random() + 40;
+      spiralOptions.width = (maxWidth - 100) * Math.random() + 100;
       spiralOptions.phase = 2 * Math.PI * Math.random();
       spiralOptions.timeshift = maxPeriod * Math.random();
       s.trajectory = trajectories.spiral(spiralOptions);
 
       // s.trajectory = trajectories.straightAhead(3000, -2000);
+      // s.trajectory = trajectories.noop();
       sprites.push(s);
     }
   }
@@ -131,15 +133,14 @@ var main = function() {
   var program = utils.setupProgram(gl, '2d-vertex-shader', '2d-fragment-shader');
   init(gl, program, canvas);
 
-
-  var texturePath = 'http://127.0.0.1:8000/textures/emoji_square.png';
+  var texturePath = 'http://127.0.0.1:8000/textures/sheet_apple_16.png';
   // var texturePath = 'http://127.0.0.1:8000/textures/doge.jpg';
-  texture.load(gl, texturePath, [0, 0, 255, 255], function(image) {
-    var sheet = spritesheet.createFromImage(image);
+  texture.load(gl, texturePath, [0, 0, 255, 255], function(image, originalWidth, originalHeight) {
+    var sheet = spritesheet.createFromImage(image, originalWidth, originalHeight, smallSize);
 
-    var nRectanglesX = 10;
+    var nRectanglesX = 30;
     var nRectanglesY = nRectanglesX;
-    var spacing = - canvas.width / 150;
+    var spacing = canvas.width / 150;
     var sprites = createSprites(gl, program, nRectanglesX, nRectanglesY, spacing, canvas.width / nRectanglesX, sheet);
 
     var vertexBuffer = utils.makeBuffer(gl, 3, gl.getAttribLocation(program, 'a_position'));
@@ -165,6 +166,8 @@ var main = function() {
       setTimeout(function() {
         window.requestAnimationFrame(draw);
       }, 1000 / framerateCap);
+
+      // TODO: start loading the high-res version
     };
 
     window.requestAnimationFrame(draw);
