@@ -15,6 +15,21 @@ var animationEnabled = true;
 var startTime;  // Value of the time (ms) when animation started
 var jitter = true;  // Whether to add small perturbations in initial emoji placement
 var smallSize = 16, largeSize = 32;
+var textures = [
+  {
+    path: 'http://127.0.0.1:8000/textures/sheet_apple_16.png',
+    size: 16
+  },
+  {
+    path: 'http://127.0.0.1:8000/textures/sheet_apple_32.png',
+    size: 32
+  },
+  {
+    path: 'http://127.0.0.1:8000/textures/doge.jpg',
+    size: 512
+  },
+];
+
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
@@ -133,10 +148,10 @@ var main = function() {
   var program = utils.setupProgram(gl, '2d-vertex-shader', '2d-fragment-shader');
   init(gl, program, canvas);
 
-  var texturePath = 'http://127.0.0.1:8000/textures/sheet_apple_16.png';
+  var tex = textures[0];
   // var texturePath = 'http://127.0.0.1:8000/textures/doge.jpg';
-  texture.load(gl, texturePath, [0, 0, 255, 255], function(image, originalWidth, originalHeight) {
-    var sheet = spritesheet.createFromImage(image, originalWidth, originalHeight, smallSize);
+  texture.load(gl, tex.path, [0, 0, 255, 255], function(image, originalWidth, originalHeight) {
+    var sheet = spritesheet.createFromImage(image, originalWidth, originalHeight, tex.size);
 
     var nRectanglesX = 30;
     var nRectanglesY = nRectanglesX;
@@ -167,8 +182,11 @@ var main = function() {
         window.requestAnimationFrame(draw);
       }, 1000 / framerateCap);
 
-      // TODO: start loading the high-res version
     };
+
+    // Start loading the high-res version (will be slower)
+    // TODO: to avoid the black flash, load into another texture slot
+    texture.load(gl, textures[1].path);
 
     window.requestAnimationFrame(draw);
   });
