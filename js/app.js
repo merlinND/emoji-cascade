@@ -109,7 +109,6 @@ var init = function(gl, program, canvas) {
   var projectionMatrix = camera.makeCamera(canvas,
                                            (Math.PI * fieldOfView / 180),
                                            1, 2000);
-  console.log(projectionMatrix);
   var matrixAttribute = gl.getUniformLocation(program, 'u_matrix');
   gl.uniformMatrix4fv(matrixAttribute, false, projectionMatrix);
 
@@ -132,7 +131,6 @@ var main = function() {
   var program = utils.setupProgram(gl, '2d-vertex-shader', '2d-fragment-shader');
   init(gl, program, canvas);
 
-  utils.setResolution(gl, program, canvasId);
 
   var texturePath = 'http://127.0.0.1:8000/textures/emoji_square.png';
   // var texturePath = 'http://127.0.0.1:8000/textures/doge.jpg';

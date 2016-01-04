@@ -35,13 +35,6 @@ module.exports = {
       );
   },
 
-  setResolution: function(gl, program, canvasId) {
-    var canvas = document.getElementById(canvasId);
-
-    var resolutionAttribute = gl.getUniformLocation(program, 'u_resolution');
-    gl.uniform2f(resolutionAttribute, canvas.width, canvas.height);
-  },
-
   setColor: function(gl, program, color) {
     var colorAttribute = gl.getUniformLocation(program, 'u_color');
     gl.uniform4fv(colorAttribute, color);
