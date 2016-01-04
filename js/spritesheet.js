@@ -3,20 +3,24 @@
 /**
  * Data structure representing the spritesheet.
  * Each sprite has a fixed square size.
+ *
+ * @param originalWidth Original size of the image (it may have been resized
+ *                      to use a power-of-two size).
+ * @param w Width of a single element of the spritesheet.
  */
 module.exports = {
-  createFromImage: function(image) {
-    var w = 21;
-    var h = 21;
+  createFromImage: function(image, originalWidth, originalHeight, w, h) {
+    w = w || 16;
+    h = h || (w || 16);
     // TODO: mechanism to exclude specific sprites from being used
     return {
       width: w,
       height: h,
-      sheetWidth: image.width,
-      sheetHeight: image.height,
+      sheetWidth: originalWidth,
+      sheetHeight: originalHeight,
 
-      nx: Math.floor(image.width / w),
-      ny: Math.floor(image.height / h),
+      nx: Math.floor(originalWidth / w),
+      ny: Math.floor(originalHeight / h),
 
       /**
        * Get UV coordinates for the sprite at position (i, j).
