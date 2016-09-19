@@ -9,6 +9,13 @@ module.exports = {
     return canvas.getContext('experimental-webgl');
   },
 
+  // Maximize viewport size
+  maximizeCanvas: function(gl) {
+    var changed = webglUtils.resizeCanvasToDisplaySize(gl.canvas);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    return changed;
+  },
+
   setupProgram: function(gl, vertexShader, fragmentShader) {
     var program = webglUtils.createProgramFromScripts(gl, [vertexShader, fragmentShader]);
     gl.useProgram(program);

@@ -72,7 +72,7 @@ module.exports = {
     var baseY = options.baseY || 600;
     var height = options.height || 1100;
     var width = options.width || 250 * (Math.random() - 0.5);
-    var fixedZ = options.fixedZ || -500 + 200 * (Math.random() - 0.5);
+    var fixedZ = options.fixedZ || -600 + 200 * (Math.random() - 0.5);
 
     var direction = options.direction || (Math.random() < 0.5 ? 1 : -1);
     var verticalOffset = options.verticalOffset || baseY;

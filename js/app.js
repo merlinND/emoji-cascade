@@ -9,22 +9,24 @@ var trajectories = require('./trajectories.js');
 
 /** Configuration and state */
 var framerateCap = 30;
-// TODO: field of view should be computed from width of the viewport?
 var fieldOfView = 70;  // In degrees
+var nearPlane = 1;
+var farPlane = 2000;
 var animationEnabled = true;
 var startTime;  // Value of the time (ms) when animation started
 var jitter = true;  // Whether to add small perturbations in initial emoji placement
+var pathPrefix = 'textures/'; // http://127.0.0.1:8000/textures
 var textures = [
   {
-    path: 'http://127.0.0.1:8000/textures/sheet_apple_16.png',
+    path: pathPrefix + 'sheet_apple_16.png',
     size: 16
   },
   {
-    path: 'http://127.0.0.1:8000/textures/sheet_apple_32.png',
+    path: pathPrefix + 'sheet_apple_32.png',
     size: 32
   },
   {
-    path: 'http://127.0.0.1:8000/textures/doge.jpg',
+    path: pathPrefix + 'doge.jpg',
     size: 512
   },
 ];
@@ -34,7 +36,6 @@ var trajectoryOptions = {
   maxWidth: 200,
   maxDepth: -2000,
   spiral: function() {
-    console.log(this);
     return {
       period: 5000,
       depth: -2000,
@@ -125,10 +126,9 @@ var init = function(gl, program, canvas) {
   gl.enable(gl.BLEND);
 
   // Setup projection matrix
-  // TODO: dynamic view
   var projectionMatrix = camera.makeCamera(canvas,
                                            (Math.PI * fieldOfView / 180),
-                                           1, 2000);
+                                           nearPlane, farPlane);
   var matrixAttribute = gl.getUniformLocation(program, 'u_matrix');
   gl.uniformMatrix4fv(matrixAttribute, false, projectionMatrix);
 
@@ -152,7 +152,6 @@ var main = function() {
   init(gl, program, canvas);
 
   var tex = textures[0];
-  // var texturePath = 'http://127.0.0.1:8000/textures/doge.jpg';
   texture.load(gl, tex.path, [0, 0, 255, 255], function(image, originalWidth, originalHeight) {
     var sheet = spritesheet.createFromImage(image, originalWidth, originalHeight, tex.size);
 
@@ -163,10 +162,20 @@ var main = function() {
 
     var vertexBuffer = utils.makeBuffer(gl, 3, gl.getAttribLocation(program, 'a_position'));
     var uvBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, "a_texcoords"));
+    var matrixAttribute = gl.getUniformLocation(program, 'u_matrix');
 
     var time;
     startTime = new Date().getTime();
     var draw = function() {
+      // Resize canvas to new window size if necessary
+      var changed = utils.maximizeCanvas(gl);
+      if (changed) {
+        // Update the camera
+        var projectionMatrix = camera.makeCamera(
+            canvas, (Math.PI * fieldOfView / 180), nearPlane, farPlane);
+        gl.uniformMatrix4fv(matrixAttribute, false, projectionMatrix);
+      }
+
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       var now = new Date().getTime();
@@ -184,7 +193,6 @@ var main = function() {
       setTimeout(function() {
         window.requestAnimationFrame(draw);
       }, 1000 / framerateCap);
-
     };
 
     // Start loading the high-res version (will be slower)
