@@ -2,13 +2,17 @@
 
 var gulp = require('gulp');
 var browserify = require('gulp-browserify');
+var htmlreplace = require('gulp-html-replace');
 var jshint = require('gulp-jshint');
+var minify = require('gulp-minify');
 
 var paths = {
+  html: ['index.html'],
   js: {
     all: ['gulpfile.js', 'js/**'],
     entryPoints: ['js/app.js']
   },
+  assets: ['textures/**'],
   target: 'dist/',
 };
 
@@ -20,6 +24,14 @@ gulp.task('browserify', function() {
       insertGlobals: false,
       // transform: ['brfs']
     }))
+    .pipe(minify({
+        ext:{
+            src:'-debug.js',
+            min:'.js'
+        },
+        exclude: ['tasks'],
+        ignoreFiles: ['.combo.js', '-min.js']
+    }))
     .pipe(gulp.dest(paths.target));
 });
 
@@ -30,7 +42,19 @@ gulp.task('lint', function() {
     .pipe(jshint.reporter('jshint-stylish'));
 });
 
-// TODO: source compression
+// Build for production
+gulp.task('build', ['browserify'], function() {
+  console.log("Building app for production.");
+  // HTML source
+  gulp.src(paths.html)
+    .pipe(htmlreplace({
+        'js': 'app.js'
+      }))
+    .pipe(gulp.dest(paths.target));
+  // Assets
+  gulp.src(paths.assets)
+    .pipe(gulp.dest(paths.target + 'textures'));
+});
 
 // Auto-run tasks on file changes
 gulp.task('watch', function() {
@@ -38,4 +62,4 @@ gulp.task('watch', function() {
 });
 
 // Run main tasks on launch
-gulp.task('default', ['lint', 'browserify'], function() {});
+gulp.task('default', ['lint', 'browserify', 'build'], function() {});
