@@ -77,7 +77,8 @@ module.exports = {
     var direction = options.direction || (Math.random() < 0.5 ? 1 : -1);
     var verticalOffset = options.verticalOffset || baseY;
     var horizontalOffset = options.verticalOffset || 30 * (Math.random() - 0.5);
-    var speed = options.speed || 0.15 + 0.1 * (Math.random() - 0.5);
+    var speedOffset = options.speedOffset || 0.15;
+    var speed = options.speed || speedOffset + 0.1 * (Math.random() - 0.5);
 
     return function(t, dt, x, y, z) {
       y -= dt * speed;

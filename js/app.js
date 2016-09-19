@@ -45,8 +45,27 @@ var trajectoryOptions = {
       timeshift: this.maxPeriod * Math.random()
     };
   },
-  cascade: function() { return {}; }
+  cascade: function() {
+    return {
+      speedOffset: 0.40
+    };
+  }
 };
+var trajectoryFactories = [
+  function(options) {
+    return trajectories.spiral(options.spiral());
+  },
+  function(options) {
+    return trajectories.cascade(options.cascade());
+  },
+  // function(options) {
+  //   return trajectories.noop();
+  // },
+  // function(options) {
+  //   return trajectories.straightAhead(options.maxPeriod, options.maxDepth);
+  // },
+];
+var currentTrajectory = 0;
 
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
@@ -65,14 +84,11 @@ var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
       var s = Sprite.fromSpritesheet(x, y, z, size, size,
                                      spritesheet, i, j);
 
-      s.trajectory = trajectories.straightAhead(trajectoryOptions.maxPeriod, trajectoryOptions.maxDepth);
-      // s.trajectory = trajectories.noop();
-      s.trajectory = trajectories.spiral(trajectoryOptions.spiral());
-      // s.trajectory = trajectories.cascade(trajectoryOptions.cascade());
-
       sprites.push(s);
     }
   }
+
+  updateTrajectories(sprites);
 
   return sprites;
 };
@@ -82,6 +98,15 @@ var animateSprites = function(sprites, t, dt) {
     sprites[i].animate(t, dt);
   }
 };
+
+var updateTrajectories = function(sprites, newTrajectory) {
+  newTrajectory = newTrajectory || trajectoryFactories[currentTrajectory];
+
+  for (var i in sprites) {
+    var s = sprites[i];
+    s.trajectory = newTrajectory(trajectoryOptions);
+  }
+}
 
 var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
   // Sort by z order before drawing so that transparency works as expected
@@ -163,6 +188,14 @@ var main = function() {
     var vertexBuffer = utils.makeBuffer(gl, 3, gl.getAttribLocation(program, 'a_position'));
     var uvBuffer = utils.makeBuffer(gl, 2, gl.getAttribLocation(program, "a_texcoords"));
     var matrixAttribute = gl.getUniformLocation(program, 'u_matrix');
+
+    // On click, change the trajectories of the sprites to the next kind (also reset time)
+    canvas.addEventListener('click', function(e) {
+      currentTrajectory = (currentTrajectory + 1) % trajectoryFactories.length;
+      updateTrajectories(sprites, trajectoryFactories[currentTrajectory]);
+      startTime = new Date().getTime();
+    });
+
 
     var time;
     startTime = new Date().getTime();
