@@ -67,6 +67,15 @@ var trajectoryFactories = [
 ];
 var currentTrajectory = 0;
 
+var updateTrajectories = function(sprites, newTrajectory) {
+  newTrajectory = newTrajectory || trajectoryFactories[currentTrajectory];
+
+  for (var i in sprites) {
+    var s = sprites[i];
+    s.trajectory = newTrajectory(trajectoryOptions);
+  }
+};
+
 var createSprites = function(gl, program, nx, ny, spacing, size, spritesheet) {
   var sprites = [];
 
@@ -99,15 +108,6 @@ var animateSprites = function(sprites, t, dt) {
   }
 };
 
-var updateTrajectories = function(sprites, newTrajectory) {
-  newTrajectory = newTrajectory || trajectoryFactories[currentTrajectory];
-
-  for (var i in sprites) {
-    var s = sprites[i];
-    s.trajectory = newTrajectory(trajectoryOptions);
-  }
-}
-
 var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
   // Sort by z order before drawing so that transparency works as expected
   // TODO: better / faster way?
@@ -122,12 +122,13 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
   var floatSize = 4;
   var nPrimitives = sprites.length * 6;
   var offset = 0;
+  var i;
 
   // ----- Vertex coordinates
   // Allocate enough space for the buffer
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, 3 * floatSize * nPrimitives, gl.STATIC_DRAW);
-  for (var i in sprites) {
+  for (i in sprites) {
     var vertices = sprites[i].getVertices();
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(vertices));
     offset += floatSize * vertices.length;
@@ -136,7 +137,7 @@ var drawSprites = function(gl, sprites, vertexBuffer, uvBuffer) {
   offset = 0;
   gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, 2 * floatSize * nPrimitives, gl.STATIC_DRAW);
-  for (var i in sprites) {
+  for (i in sprites) {
     var uvs = sprites[i].uv;
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(uvs));
     offset += floatSize * uvs.length;
@@ -190,7 +191,7 @@ var main = function() {
     var matrixAttribute = gl.getUniformLocation(program, 'u_matrix');
 
     // On click, change the trajectories of the sprites to the next kind (also reset time)
-    canvas.addEventListener('click', function(e) {
+    canvas.addEventListener('click', function() {
       currentTrajectory = (currentTrajectory + 1) % trajectoryFactories.length;
       updateTrajectories(sprites, trajectoryFactories[currentTrajectory]);
       startTime = new Date().getTime();

@@ -79,9 +79,11 @@ module.exports = {
     var horizontalOffset = options.verticalOffset || 30 * (Math.random() - 0.5);
     var speedOffset = options.speedOffset || 0.15;
     var speed = options.speed || speedOffset + 0.1 * (Math.random() - 0.5);
+    var acceleration = options.acceleration || 0.6;
 
     return function(t, dt, x, y, z) {
-      y -= dt * speed;
+      var currentSpeed = (y - height) / (baseY - height) * acceleration * speed;
+      y -= dt * currentSpeed;
       if (y < baseY - height) {
         y = baseY;
       }
