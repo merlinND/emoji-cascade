@@ -11,16 +11,14 @@
     "webgl"
   ],
   "author": "Merlin Nimier-David",
-  "license": "ISC",
-  "dev-dependencies": {
+  "license": "MIT",
+  "devDependencies": {
     "browserify": "^12.0.1",
     "gulp": "^3.9.0",
     "gulp-browserify": "^0.5.1",
     "gulp-jshint": "^2.0.0",
     "jshint": "^2.8.0",
-    "jshint-stylish": "^2.1.0"
-  },
-  "devDependencies": {
+    "jshint-stylish": "^2.1.0",
     "gulp-html-replace": "^1.6.1",
     "gulp-minify": "0.0.14"
   }

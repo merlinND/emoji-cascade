@@ -1,7 +1,7 @@
-Emoji Cascade
+Emoji Cascade ([live demo](http://three-d.xyz/))
 =============
 
-A WebGL demo.
+A WebGL demo. [Try it live](http://three-d.xyz/)!
 
 ![Example rendering of the emoji cascade](images/example.png)
 

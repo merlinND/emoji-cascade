@@ -1,5 +1,7 @@
 'use strict';
 
+// TODO: loader pre-screen (texture is quite large and slow to load)
+
 var camera = require('./camera.js');
 var texture = require('./texture.js');
 var utils = require('./utils.js');
